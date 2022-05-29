@@ -1,4 +1,5 @@
- //
+
+//
 // Created by layan on 23/05/2022.
 //
 
@@ -85,9 +86,12 @@ Queue<T>::~Queue()
 }
 
 template <class T>
-void pushBack(const T& newNodeData)
+void Queue<T>::pushBack(const T& newNodeData)
 {
-    typename Queue<T>::Node *newNodePtr = new typename Queue<T>::Node(newNodeData);
+    Node *newNodePtr = new Node(newNodeData);
+    m_backNode->m_nextNode=newNodePtr;
+    m_backNode=newNodePtr;
+    m_queueSize++;
 }
 
 
