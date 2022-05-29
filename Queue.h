@@ -1,4 +1,4 @@
-//
+ //
 // Created by layan on 23/05/2022.
 //
 
@@ -46,16 +46,53 @@ private:
     Node *m_backNode;
     int m_queueSize;
 };
+template <class T>
+Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m_nodeValue)),
+          m_backNode(new Node(queue.m_backNode->m_nodeValue)), m_queueSize(queue.m_queueSize)
+{
+    Node* ptr=m_frontNode;
+    for(T& elem :queue)
+    {
+        if(elem!=queue.m_frontNode && elem!=queue.m_backNode)
+        {
+            Node *newNodePtr = new Node(*elem);
+            ptr->m_nextNode = newNodePtr;
+            ptr = newNodePtr;
+        }
+    }
+    ptr->m_nextNode=m_backNode;
+}
+
 
 template <class T>
-Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue->m_frontNode)),
-                                       m_backNode(new Node(queue.m_backNode)), m_queueSize(queue.m_queueSize)
+Queue<T>::~Queue()
 {
-                                            
+    Node* tmp=m_frontNode;
+    while (m_frontNode!=m_backNode)
+    {
+        m_frontNode=m_frontNode->m_nextNode;
+        delete tmp;
+        tmp=m_frontNode;
+    }
+    if(m_backNode!= nullptr)
+    {
+        delete m_backNode;
+    }
+
+    m_frontNode= nullptr;
+    m_backNode= nullptr;
+    m_queueSize=0;
+}
+
+template <class T>
+void pushBack(const T& newNodeData)
+{
+    typename Queue<T>::Node *newNodePtr = new typename Queue<T>::Node(newNodeData);
 }
 
 
 
+//----------------------------------------------------------------------------------------------
 template <class T>
 class Queue<T>::Iterator
 {
