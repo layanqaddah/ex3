@@ -6,6 +6,7 @@
 #ifndef ASSIGNMENT3_QUEUE_H
 #define ASSIGNMENT3_QUEUE_H
 
+#include<iostream>
 //typedef int S;
 template <class T>
 class Queue
@@ -16,6 +17,7 @@ public:
     Queue& operator=(const Queue& queue);
     ~Queue();
 
+    void printQueue() const;
     void pushBack(const T& newNodeData);
     T& front();
     void popFront();
@@ -47,16 +49,17 @@ private:
     Node *m_backNode;
     int m_queueSize;
 };
+
 template <class T>
 Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m_nodeValue)),
-          m_backNode(new Node(queue.m_backNode->m_nodeValue)), m_queueSize(queue.m_queueSize)
+                                       m_backNode(new Node(queue.m_backNode->m_nodeValue)), m_queueSize(queue.m_queueSize)
 {
     Node* ptr=m_frontNode;
-    for(T& elem :queue)
+    for(Iterator it=queue.begin(); it!=queue.end(); it++)
     {
-        if(elem!=queue.m_frontNode && elem!=queue.m_backNode)
+        if(it!=queue.m_frontNode && it!=queue.m_backNode)
         {
-            Node *newNodePtr = new Node(*elem);
+            Node *newNodePtr = new Node(*it);
             ptr->m_nextNode = newNodePtr;
             ptr = newNodePtr;
         }
