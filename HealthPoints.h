@@ -33,4 +33,4 @@ bool operator<=(const HealthPoints& healthPoint1,const HealthPoints& healthPoint
 bool operator>(const HealthPoints& healthPoint1,const HealthPoints& healthPoint2);
 bool operator>=(const HealthPoints& healthPoint1,const HealthPoints& healthPoint2);
 
-#endif HW3_HEALTHPOINTS_H
+#endif //HW3_HEALTHPOINTS_H
