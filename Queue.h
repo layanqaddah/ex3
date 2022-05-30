@@ -17,8 +17,8 @@ public:
     Queue& operator=(const Queue& queue);
     ~Queue();
 
-    void printQueue();
     /**--------- Interface ---------**/
+    void printQueue();
     void pushBack(const T& newNodeData);
     T& front();
     void popFront();
@@ -46,7 +46,12 @@ public:
     }
 
 private:
-    class Node{
+    Node *m_frontNode;
+    Node *m_backNode;
+    int m_queueSize;
+
+    class Node
+    {
     public:
         T m_nodeValue;
         Node *m_nextNode;
@@ -56,10 +61,6 @@ private:
         Node& operator=(const Node& nodeValue)=delete;
         ~Node()=default;
     };
-
-    Node *m_frontNode;
-    Node *m_backNode;
-    int m_queueSize;
 };
 
 
