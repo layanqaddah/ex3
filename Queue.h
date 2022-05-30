@@ -294,6 +294,15 @@ const T& Queue<T>::ConstIterator::operator*() const
     return m_currentNodePtr->m_nodeValue;
 }
 
+//----------------------------------------trasform function-------------------------------------
+template<class S,class Function>
+void transform(Queue<S>& queue, Function function)
+{
+    for (typename Queue<S>::Iterator it = queue.begin(); it != queue.end(); ++it)
+    {
+       function(*it);
+    }
+}
 
 
 #endif //ASSIGNMENT3_QUEUE_H
