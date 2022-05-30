@@ -12,7 +12,7 @@ class Queue
 {
 
 public:
-    Queue():m_frontNode(nullptr), m_backNode(nullptr), m_queueSize(0){};
+    Queue():m_frontNode(nullptr), m_backNode(nullptr), m_queueSize(0){}
     Queue(const Queue& queue);
     Queue& operator=(const Queue& queue);
     ~Queue();
@@ -29,17 +29,17 @@ public:
     Iterator begin()
     {
         return Iterator(m_frontNode);
-    };
+    }
     Iterator end()
     {
         return Iterator(nullptr);
-    };
+    }
     /**--------- ConstIterator ---------**/
     class ConstIterator;
     ConstIterator begin() const
     {
         return ConstIterator(m_frontNode);
-    };
+    }
     ConstIterator end() const
     {
         return ConstIterator(nullptr);
@@ -57,7 +57,7 @@ private:
         T m_nodeValue;
         Node *m_nextNode;
 
-        explicit Node(const T& nodeValue):m_nodeValue(nodeValue),m_nextNode(nullptr){};
+        explicit Node(const T& nodeValue):m_nodeValue(nodeValue),m_nextNode(nullptr){}
         Node(const Node& nodeValue)=delete;
         Node& operator=(const Node& nodeValue)=delete;
         ~Node()=default;
@@ -143,7 +143,7 @@ template <class T>
 T& Queue<T>::front()
 {
     return this->m_frontNode->m_nodeValue;
-};
+}
 
 /**
  * @brief removes the front element of queue 
@@ -157,7 +157,7 @@ void Queue<T>::popFront()
     m_frontNode=m_frontNode->m_nextNode;
     delete target;
     --m_queueSize;
-};
+}
 
 /**
  * @brief size of the queue
@@ -168,7 +168,7 @@ template <class T>
 int Queue<T>::size() const
 {
     return this->m_queueSize;
-};
+}
 
 
 template <class T>
