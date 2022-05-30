@@ -18,7 +18,7 @@ public:
     ~Queue();
 
     /**--------- Interface ---------**/
-    void printQueue();
+    void printQueue();    //////////////////////////////////////////////////////////////////////////// to be removed
     void pushBack(const T& newNodeData);
     T& front();
     void popFront();
@@ -44,6 +44,9 @@ public:
     {
         return ConstIterator(nullptr);
     }
+    /**--------- Exceptions ---------**/
+    class EmptyQueue{};
+    class InvalidOperation{};
 
 private:
     class Node;
@@ -75,21 +78,30 @@ Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m
                      m_backNode(new Node(queue.m_backNode->m_nodeValue)), m_queueSize(queue.m_queueSize)
 {
     Node* ptr=m_frontNode;
-    for(Queue<T>::ConstIterator it=queue.begin(); it!=queue.end(); ++it)
-    {
-        if(it!=queue.m_frontNode && it!=queue.m_backNode)
-        {
-            Node *newNodePtr = new Node(*it);
-            ptr->m_nextNode = newNodePtr;
-            ptr = newNodePtr;
+    try {
+        for (Queue<T>::ConstIterator it = queue.begin(); it != queue.end(); ++it) {
+            if (it != queue.m_frontNode && it != queue.m_backNode) {
+                Node *newNodePtr = new Node(*it);
+                ptr->m_nextNode = newNodePtr;
+                ptr = newNodePtr;
+            }
         }
+    }catch(const std::bad_alloc&)
+    {
+        while(m_frontNode!=nullptr)
+        {
+            Node* tmp=m_frontNode;
+            m_frontNode=m_frontNode->m_nextNode;
+            delete tmp;
+        }
+        delete m_backNode;
     }
     ptr->m_nextNode=m_backNode;
 }
 
 
 /**
- * Queue Copy C'tor
+ * Queue D'tor
  * */
 template <class T>
 Queue<T>::~Queue()
@@ -142,6 +154,10 @@ void Queue<T>::pushBack(const T& newNodeData)
 template <class T>
 T& Queue<T>::front()
 {
+    if(m_queueSize<=0)
+    {
+        throw EmptyQueue();
+    }
     return this->m_frontNode->m_nodeValue;
 }
 
@@ -153,6 +169,10 @@ T& Queue<T>::front()
 template <class T>
 void Queue<T>::popFront()
 {
+    if(m_queueSize<=0)
+    {
+        throw EmptyQueue();
+    }
     Node *target=m_frontNode;
     m_frontNode=m_frontNode->m_nextNode;
     delete target;
@@ -182,14 +202,13 @@ void Queue<T>::printQueue()
 
 
 /**--------------------------------------------------- Iterator ---------------------------------------------------**/
-/************change the names of the member variables to m_name format**/
 template <class T>
 class Queue<T>::Iterator
 {
 private:
-    Node *current_node;
+    Node *m_currentNode;
 public:
-    explicit Iterator(Node* node):current_node(node){};
+    explicit Iterator(Node* node):m_currentNode(node){};
     Iterator(const Iterator&)=default;
     ~Iterator()=default;
     Iterator& operator=(const Iterator&)=default;
@@ -200,46 +219,40 @@ public:
 
 };
 
-
-/*** WHAT TO DO IF ANY OF THESE OPERATORS ARE USED
- * ON THE ITERATOR RETURNED BY EMD ?  OR DOES THE CONVENTION PROHIBIT SUCH USE ?***/
 template <class T>
 typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 {
-    current_node = current_node->m_nextNode;
+    m_currentNode = m_currentNode->m_nextNode;
     return *this;
 }
 
 template <class T>
 typename Queue<T>::Iterator Queue<T>::Iterator::operator++(int)
 {
-    Queue<T>::Iterator *tmp=this;
+    Queue<T>::Iterator tmp=*this;
     ++*this;
-    return *tmp;
+    return tmp;
 }
 
 template <class T>
 bool Queue<T>::Iterator::operator!=(const Iterator& iterator)const
 {
-    return !(current_node==iterator.current_node);
+    return !(m_currentNode==iterator.m_currentNode);
 }
 
 template <class T>
 T& Queue<T>::Iterator::operator*()
 {
-    return current_node->m_nodeValue;
+    return m_currentNode->m_nodeValue;
 }
 
 
 /**--------------------------------------------------- ConstIterator ---------------------------------------------------**/
-/*
- * i had to remove the explicit keyword from the c'tor for the converstion between Node to ConstIterator in the for loop inside the queue copy c'tor
- */
 template <class T>
 class Queue<T>::ConstIterator
 {
 public:
-    ConstIterator(const Node *node):m_currentNode(node){};
+    ConstIterator(const Node *node):m_currentNodePtr(node){};
     ConstIterator(const ConstIterator&)=default;
     ~ConstIterator()=default;
     ConstIterator& operator=(const ConstIterator&)=default;
@@ -247,38 +260,38 @@ public:
     ConstIterator& operator++();
     ConstIterator operator++(int);
     bool operator!=(const ConstIterator& constIterator) const;
-    const T& operator*()const;
+    const T& operator*() const;
 
 private:
-    const Node *m_currentNode;
+    const Node *m_currentNodePtr;
 };
 
 
 template <class T>
 typename Queue<T>::ConstIterator& Queue<T>::ConstIterator::operator++()
 {
-    m_currentNode=m_currentNode->m_nextNode;
+    m_currentNodePtr=m_currentNodePtr->m_nextNode;
     return *this;
 }
 
 template <class T>
 typename Queue<T>::ConstIterator Queue<T>::ConstIterator::operator++(int)
 {
-    Queue<T>::ConstIterator *tmp=this;
+    Queue<T>::ConstIterator tmp=*this;
     ++*this;
-    return *tmp;
+    return tmp;
 }
 
 template <class T>
 bool Queue<T>::ConstIterator::operator!=(const ConstIterator& constIterator)const
 {
-    return !(m_currentNode==constIterator.m_currentNode);
+    return !(m_currentNodePtr==constIterator.m_currentNodePtr);
 }
 
 template <class T>
 const T& Queue<T>::ConstIterator::operator*() const
 {
-    return m_currentNode->m_nodeValue;
+    return m_currentNodePtr->m_nodeValue;
 }
 
 
