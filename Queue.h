@@ -46,6 +46,7 @@ public:
     }
 
 private:
+    class Node;
     Node *m_frontNode;
     Node *m_backNode;
     int m_queueSize;
