@@ -46,7 +46,6 @@ public:
     }
     /**--------- Exceptions ---------**/
     class EmptyQueue{};
-    class InvalidOperation{};
 
 private:
     class Node;
@@ -257,6 +256,9 @@ public:
     Iterator operator++(int);
     bool operator!=(const Iterator& iterator)const;
     T& operator*();
+
+    class InvalidOperation{};
+
 private:
     Node *m_currentNodePtr;
 };
@@ -310,11 +312,12 @@ public:
     ConstIterator(const ConstIterator&)=default;
     ~ConstIterator()=default;
     ConstIterator& operator=(const ConstIterator&)=default;
-    /**should we decalre the ++ operator as const ??????????????**/
     ConstIterator& operator++();
     ConstIterator operator++(int);
     bool operator!=(const ConstIterator& constIterator) const;
     const T& operator*() const;
+
+    class InvalidOperation{};
 
 private:
     const Node *m_currentNodePtrConst;
