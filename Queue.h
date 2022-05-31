@@ -95,10 +95,50 @@ Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m
             delete tmp;
         }
         delete m_backNode;
-        throw;  ///////////////////////////////////////////////////////////////////// added this line to forward the exception to the next try/catch block
+        throw;
     }
     ptr->m_nextNode=m_backNode;
 }
+
+/**
+ *
+ */
+ template<class T>
+Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
+{
+    if(&queue == this)
+    {
+        return *this;
+    }
+    Node* tempFront=new Node(queue.m_frontNode->m_nodeValue);
+    Node* temp=tempFront;
+    try
+    {
+        Queue<T>::ConstIterator it = queue.begin();
+        ++it;
+        for (; it != queue.end(); ++it)
+        {
+            temp->m_nextNode = new Node(*it);
+            temp=temp->m_nextNode;
+        }
+    }
+    catch(...)
+    {
+        throw;
+    }
+    while(m_frontNode!=nullptr)
+    {
+        Node* tmp = m_frontNode;
+        m_frontNode = m_frontNode->m_nextNode;
+        delete tmp;
+    }
+    delete m_backNode;
+    m_backNode = temp;
+    m_frontNode=tempFront;
+    m_queueSize = queue.m_queueSize;
+    return *this;
+}
+
 
 
 /**
@@ -124,6 +164,7 @@ Queue<T>::~Queue()
     m_queueSize=0;
 }
 
+
 /**
  * @brief adds a new element to the end of the queue
  * 
@@ -134,7 +175,7 @@ Queue<T>::~Queue()
 template <class T>
 void Queue<T>::pushBack(const T& newNodeData)
 {
-    Node *newNodePtr = new Node(newNodeData);  /////////////////////////////////////////////Question: new throws std::bad_alloc automatically. since we have only one allocation inside the pushback function then we don't need to create a try/catch block since we don't have to release previously allocated nodes
+    Node *newNodePtr = new Node(newNodeData);
     ///another question: since every block that uses the copy c'tor or the pushBack function makes use of dynamic allocations and could throw an std::bad_alloc, should we enclose such block with a try/cathc block ?
     if(m_backNode==nullptr)
     {
@@ -207,10 +248,8 @@ void Queue<T>::printQueue()
 template <class T>
 class Queue<T>::Iterator
 {
-private:
-    Node *m_currentNode;
 public:
-    explicit Iterator(Node* node):m_currentNode(node){};
+    explicit Iterator(Node* node):m_currentNodePtr(node){};
     Iterator(const Iterator&)=default;
     ~Iterator()=default;
     Iterator& operator=(const Iterator&)=default;
@@ -218,19 +257,28 @@ public:
     Iterator operator++(int);
     bool operator!=(const Iterator& iterator)const;
     T& operator*();
-
+private:
+    Node *m_currentNodePtr;
 };
 
 template <class T>
 typename Queue<T>::Iterator& Queue<T>::Iterator::operator++()
 {
-    m_currentNode = m_currentNode->m_nextNode;
+    if(m_currentNodePtr == nullptr)
+    {
+        throw InvalidOperation();
+    }
+    m_currentNodePtr = m_currentNodePtr->m_nextNode;
     return *this;
 }
 
 template <class T>
 typename Queue<T>::Iterator Queue<T>::Iterator::operator++(int)
 {
+    if(m_currentNodePtr == nullptr)
+    {
+        throw InvalidOperation();
+    }
     Queue<T>::Iterator tmp=*this;
     ++*this;
     return tmp;
@@ -239,13 +287,17 @@ typename Queue<T>::Iterator Queue<T>::Iterator::operator++(int)
 template <class T>
 bool Queue<T>::Iterator::operator!=(const Iterator& iterator)const
 {
-    return !(m_currentNode==iterator.m_currentNode);
+    return !(m_currentNodePtr==iterator.m_currentNodePtr);
 }
 
 template <class T>
 T& Queue<T>::Iterator::operator*()
 {
-    return m_currentNode->m_nodeValue;
+    if(m_currentNodePtr == nullptr)
+    {
+        throw InvalidOperation();
+    }
+    return m_currentNodePtr->m_nodeValue;
 }
 
 
@@ -254,7 +306,7 @@ template <class T>
 class Queue<T>::ConstIterator
 {
 public:
-    ConstIterator(const Node *node):m_currentNodePtr(node){};
+    ConstIterator(const Node *node):m_currentNodePtrConst(node){};
     ConstIterator(const ConstIterator&)=default;
     ~ConstIterator()=default;
     ConstIterator& operator=(const ConstIterator&)=default;
@@ -265,20 +317,28 @@ public:
     const T& operator*() const;
 
 private:
-    const Node *m_currentNodePtr;
+    const Node *m_currentNodePtrConst;
 };
 
 
 template <class T>
 typename Queue<T>::ConstIterator& Queue<T>::ConstIterator::operator++()
 {
-    m_currentNodePtr=m_currentNodePtr->m_nextNode;
+    if(m_currentNodePtrConst== nullptr)
+    {
+        throw InvalidOperation();
+    }
+    m_currentNodePtrConst=m_currentNodePtrConst->m_nextNode;
     return *this;
 }
 
 template <class T>
 typename Queue<T>::ConstIterator Queue<T>::ConstIterator::operator++(int)
 {
+    if(m_currentNodePtrConst== nullptr)
+    {
+        throw InvalidOperation();
+    }
     Queue<T>::ConstIterator tmp=*this;
     ++*this;
     return tmp;
@@ -287,13 +347,17 @@ typename Queue<T>::ConstIterator Queue<T>::ConstIterator::operator++(int)
 template <class T>
 bool Queue<T>::ConstIterator::operator!=(const ConstIterator& constIterator)const
 {
-    return !(m_currentNodePtr==constIterator.m_currentNodePtr);
+    return !(m_currentNodePtrConst==constIterator.m_currentNodePtrConst);
 }
 
 template <class T>
 const T& Queue<T>::ConstIterator::operator*() const
 {
-    return m_currentNodePtr->m_nodeValue;
+    if(m_currentNodePtrConst== nullptr)
+    {
+        throw InvalidOperation();
+    }
+    return m_currentNodePtrConst->m_nodeValue;
 }
 
 //----------------------------------------trasform function-------------------------------------
