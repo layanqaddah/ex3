@@ -215,9 +215,18 @@ void Queue<T>::popFront()
     {
         throw EmptyQueue();
     }
-    Node *target=m_frontNode;
-    m_frontNode=m_frontNode->m_nextNode;
-    delete target;
+    if(m_frontNode==m_backNode)
+    {
+        delete m_frontNode;
+        m_frontNode = nullptr;
+        m_backNode = nullptr;
+    }
+    else
+    {
+        Node *target=m_frontNode;
+        m_frontNode=m_frontNode->m_nextNode;
+        delete target;
+    }
     --m_queueSize;
 }
 
