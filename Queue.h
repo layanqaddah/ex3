@@ -5,7 +5,7 @@
 #ifndef ASSIGNMENT3_QUEUE_H
 #define ASSIGNMENT3_QUEUE_H
 
-#include<iostream> ////////////////////////////////////////////////////////////// remember to remove if not needed inside Queue.h anymore!
+#include<iostream>
 
 template <class T>
 class Queue
@@ -16,15 +16,12 @@ public:
     Queue(const Queue& queue);
     Queue& operator=(const Queue& queue);
     ~Queue();
-
-    /**--------- Interface ---------**/
-    void printQueue();    //////////////////////////////////////////////////////////////////////////// to be removed
+    
     void pushBack(const T& newNodeData);
-    T& front();
+    T& front() const;
     void popFront();
     int size() const;
 
-    /**--------- Iterator ---------**/
     class Iterator;
     Iterator begin()
     {
@@ -34,7 +31,7 @@ public:
     {
         return Iterator(nullptr);
     }
-    /**--------- ConstIterator ---------**/
+
     class ConstIterator;
     ConstIterator begin() const
     {
@@ -44,7 +41,7 @@ public:
     {
         return ConstIterator(nullptr);
     }
-    /**--------- Exceptions ---------**/
+
     class EmptyQueue{};
 
 private:
@@ -69,9 +66,7 @@ private:
 
 
 
-/**
- * Queue Copy C'tor
- * */
+
 template <class T>
 Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m_nodeValue)),
                                        m_backNode(new Node(queue.m_backNode->m_nodeValue)), m_queueSize(queue.m_queueSize)
@@ -99,9 +94,7 @@ Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m
     ptr->m_nextNode=m_backNode;
 }
 
-/**
- *
- */
+
  template<class T>
 Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
 {
@@ -121,17 +114,22 @@ Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
             temp=temp->m_nextNode;
         }
     }
-    catch(...)
+    catch(const std::bad_alloc&)
     {
+        while(tempFront!= nullptr)
+        {
+            Node* tmp = tempFront;
+            tempFront = tempFront->m_nextNode;
+            delete tmp;
+        }
         throw;
     }
-    while(m_frontNode!=nullptr)
+    while(m_frontNode!= nullptr)
     {
         Node* tmp = m_frontNode;
         m_frontNode = m_frontNode->m_nextNode;
         delete tmp;
     }
-    delete m_backNode;
     m_backNode = temp;
     m_frontNode=tempFront;
     m_queueSize = queue.m_queueSize;
@@ -140,9 +138,7 @@ Queue<T>& Queue<T>::operator=(const Queue<T>& queue)
 
 
 
-/**
- * Queue D'tor
- * */
+
 template <class T>
 Queue<T>::~Queue()
 {
@@ -164,18 +160,10 @@ Queue<T>::~Queue()
 }
 
 
-/**
- * @brief adds a new element to the end of the queue
- * 
- * @param element to add to queue  
- * 
- * @return ** void
- */
 template <class T>
 void Queue<T>::pushBack(const T& newNodeData)
 {
     Node *newNodePtr = new Node(newNodeData);
-    ///another question: since every block that uses the copy c'tor or the pushBack function makes use of dynamic allocations and could throw an std::bad_alloc, should we enclose such block with a try/cathc block ?
     if(m_backNode==nullptr)
     {
         m_backNode=m_frontNode=newNodePtr;
@@ -188,13 +176,9 @@ void Queue<T>::pushBack(const T& newNodeData)
     m_queueSize++;
 }
 
-/**
- * @brief returns the front element of queue
- * 
- * @return ** queue front 
- */
+
 template <class T>
-T& Queue<T>::front()
+T& Queue<T>::front() const
 {
     if(m_queueSize<=0)
     {
@@ -203,11 +187,7 @@ T& Queue<T>::front()
     return this->m_frontNode->m_nodeValue;
 }
 
-/**
- * @brief removes the front element of queue 
- *
- * @return ** void 
- */
+
 template <class T>
 void Queue<T>::popFront()
 {
@@ -230,11 +210,7 @@ void Queue<T>::popFront()
     --m_queueSize;
 }
 
-/**
- * @brief size of the queue
- * 
- * @return **queue size
- */
+
 template <class T>
 int Queue<T>::size() const
 {
@@ -242,17 +218,7 @@ int Queue<T>::size() const
 }
 
 
-template <class T>
-void Queue<T>::printQueue()
-{
-    for(T& elem:*this)
-    {
-        std::cout<<elem<<std::endl;
-    }
-}
 
-
-/**--------------------------------------------------- Iterator ---------------------------------------------------**/
 template <class T>
 class Queue<T>::Iterator
 {
@@ -264,7 +230,7 @@ public:
     Iterator& operator++();
     Iterator operator++(int);
     bool operator!=(const Iterator& iterator)const;
-    T& operator*();
+    T& operator*() const;
 
     class InvalidOperation{};
 
@@ -302,7 +268,7 @@ bool Queue<T>::Iterator::operator!=(const Iterator& iterator)const
 }
 
 template <class T>
-T& Queue<T>::Iterator::operator*()
+T& Queue<T>::Iterator::operator*() const
 {
     if(m_currentNodePtr == nullptr)
     {
@@ -312,7 +278,8 @@ T& Queue<T>::Iterator::operator*()
 }
 
 
-/**--------------------------------------------------- ConstIterator ---------------------------------------------------**/
+
+
 template <class T>
 class Queue<T>::ConstIterator
 {
@@ -372,7 +339,7 @@ const T& Queue<T>::ConstIterator::operator*() const
     return m_currentNodePtrConst->m_nodeValue;
 }
 
-//----------------------------------------trasform function-------------------------------------
+
 template<class S,class Function>
 void transform(Queue<S>& queue, Function function)
 {
@@ -381,12 +348,13 @@ void transform(Queue<S>& queue, Function function)
         function(*it);
     }
 }
-//-----------------------------------------filter function--------------------------------------
+
+
 template <class T, class Function>
-Queue<T> filter(Queue<T>& queue, Function function)
+Queue<T> filter(const Queue<T>& queue, Function function)
 {
     Queue<T> resQueue;
-    for(T& element: queue)
+    for(const T& element: queue)
     {
         if(function(element))
         {
