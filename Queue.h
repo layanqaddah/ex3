@@ -65,7 +65,7 @@ private:
         Node& operator=(const Node& nodeValue)=delete;
         ~Node()=default;
     };
-    
+
 };
 
 
@@ -75,7 +75,7 @@ private:
  * */
 template <class T>
 Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m_nodeValue)),
-                     m_backNode(new Node(queue.m_backNode->m_nodeValue)), m_queueSize(queue.m_queueSize)
+                                       m_backNode(new Node(queue.m_backNode->m_nodeValue)), m_queueSize(queue.m_queueSize)
 {
     Node* ptr=m_frontNode;
     try {
@@ -95,6 +95,7 @@ Queue<T>::Queue(const Queue<T>& queue):m_frontNode(new Node(queue.m_frontNode->m
             delete tmp;
         }
         delete m_backNode;
+        throw;  ///////////////////////////////////////////////////////////////////// added this line to forward the exception to the next try/catch block
     }
     ptr->m_nextNode=m_backNode;
 }
@@ -133,7 +134,8 @@ Queue<T>::~Queue()
 template <class T>
 void Queue<T>::pushBack(const T& newNodeData)
 {
-    Node *newNodePtr = new Node(newNodeData);
+    Node *newNodePtr = new Node(newNodeData);  /////////////////////////////////////////////Question: new throws std::bad_alloc automatically. since we have only one allocation inside the pushback function then we don't need to create a try/catch block since we don't have to release previously allocated nodes
+    ///another question: since every block that uses the copy c'tor or the pushBack function makes use of dynamic allocations and could throw an std::bad_alloc, should we enclose such block with a try/cathc block ?
     if(m_backNode==nullptr)
     {
         m_backNode=m_frontNode=newNodePtr;
@@ -300,9 +302,21 @@ void transform(Queue<S>& queue, Function function)
 {
     for (typename Queue<S>::Iterator it = queue.begin(); it != queue.end(); ++it)
     {
-       function(*it);
+        function(*it);
     }
 }
-
-
+//-----------------------------------------filter function--------------------------------------
+template <class T, class Function>
+Queue<T> filter(Queue<T>& queue, Function function)
+{
+    Queue<T> resQueue;
+    for(T& element: queue)
+    {
+        if(function(element))
+        {
+            resQueue.pushBack(element);
+        }
+    }
+    return resQueue;
+}
 #endif //ASSIGNMENT3_QUEUE_H
